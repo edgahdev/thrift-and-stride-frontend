@@ -5,29 +5,46 @@ import Navbar from './components/Navbar';
 import AdminPage from './pages/AdminPage';
 import CartPage from './pages/CartPage';
 import Login from './pages/Login';
-import Home from './pages/Home'; // updated home page with search + categories
-import Products from './pages/Products'; // optional if different from Home
+import Home from './pages/Home';
+import Products from './pages/Products';
+import ProfilePage from './pages/ProfilePage';
+import TrackOrder from './pages/TrackOrder';
 import Footer from './components/Footer';
-import { ThemeContext } from './context/ThemeContext'; // ✅ Import context
+import { ThemeContext } from './context/ThemeContext';
+import { useAuth } from './context/AuthContext';
+import SignupLogin from "./pages/SignupLogin";
 
 const App = () => {
   const [searchTerm, setSearchTerm] = useState('');
-  const isAdmin = localStorage.getItem('isAdmin');
-  const { darkMode } = useContext(ThemeContext); // ✅ Get darkMode
+  const { darkMode } = useContext(ThemeContext);
+  const { user } = useAuth();
+  const isAdmin = localStorage.getItem('isAdmin') === 'true';
 
   return (
-    <div className={darkMode ? 'dark bg-gray-900 text-white min-h-screen' : 'bg-white text-black min-h-screen'}>
+    <div
+      className={`flex flex-col min-h-screen transition-colors duration-300 ${
+        darkMode ? 'dark bg-gray-900 text-white' : 'bg-white text-black'
+      }`}
+    >
       <Navbar onSearch={setSearchTerm} />
-      <Routes>
-        <Route path="/" element={<Home searchTerm={searchTerm} />} />
-        <Route
-          path="/admin"
-          element={isAdmin ? <AdminPage /> : <Navigate to="/login" />}
-        />
-        <Route path="/cart" element={<CartPage />} />
-        <Route path="/login" element={<Login />} />
-        <Route path="/products" element={<Products />} />
-      </Routes>
+
+      {/* Main content fills remaining space */}
+      <main className="flex-grow">
+        <Routes>
+          <Route path="/" element={<Home searchTerm={searchTerm} />} />
+          <Route
+            path="/admin"
+            element={isAdmin ? <AdminPage /> : <Navigate to="/login" replace />}
+          />
+          <Route path="/cart" element={<CartPage />} />
+          <Route path="/login" element={<Login />} />
+          <Route path="/products" element={<Products />} />
+          <Route path="/account" element={<ProfilePage />} />
+          <Route path="/signup-login" element={<SignupLogin />} />
+          <Route path="/track-order" element={<TrackOrder />} />
+        </Routes>
+      </main>
+
       <Footer />
     </div>
   );

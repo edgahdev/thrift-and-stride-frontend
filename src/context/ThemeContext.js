@@ -1,25 +1,30 @@
-import React, { createContext, useEffect, useState } from 'react';
+// src/context/ThemeContext.jsx
+import React, { createContext, useEffect, useState, useContext } from 'react';
 
 export const ThemeContext = createContext();
 
 export const ThemeProvider = ({ children }) => {
+  // Initialize theme from localStorage or default to light mode
   const [darkMode, setDarkMode] = useState(() => {
-    const storedMode = localStorage.getItem('theme');
-    return storedMode === 'dark' ? true : false;
+    try {
+      return localStorage.getItem('theme') === 'dark';
+    } catch {
+      return false; // fallback for browsers without localStorage
+    }
   });
 
-  const toggleTheme = () => {
-    setDarkMode(prev => !prev);
-  };
+  // Toggle between light/dark
+  const toggleTheme = () => setDarkMode((prev) => !prev);
 
+  // Apply theme changes to the DOM & localStorage
   useEffect(() => {
-    const root = window.document.documentElement;
-    if (darkMode) {
-      root.classList.add('dark');
-      localStorage.setItem('theme', 'dark');
-    } else {
-      root.classList.remove('dark');
-      localStorage.setItem('theme', 'light');
+    const root = document.documentElement;
+    root.classList.toggle('dark', darkMode);
+
+    try {
+      localStorage.setItem('theme', darkMode ? 'dark' : 'light');
+    } catch {
+      console.warn("Could not save theme to localStorage.");
     }
   }, [darkMode]);
 
@@ -28,4 +33,13 @@ export const ThemeProvider = ({ children }) => {
       {children}
     </ThemeContext.Provider>
   );
+};
+
+// ✅ Custom hook to use theme in components
+export const useTheme = () => {
+  const context = useContext(ThemeContext);
+  if (!context) {
+    throw new Error("useTheme must be used within a ThemeProvider");
+  }
+  return context;
 };

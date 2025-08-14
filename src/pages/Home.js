@@ -9,15 +9,29 @@ import WhyChooseUs from '../components/WhyChooseUs';
 import Testimonials from '../components/Testimonials';
 import Newsletter from '../components/Newsletter';
 
-const Home = ({ searchTerm }) => {
+const Home = ({ searchTerm = '' }) => {
   const [products, setProducts] = useState([]);
   const [selectedCategory, setSelectedCategory] = useState('All');
+  const [visibleCount, setVisibleCount] = useState(8);
 
   useEffect(() => {
     axios
       .get('http://localhost:5000/api/products')
-      .then(res => setProducts(res.data))
-      .catch(err => console.error(err));
+      .then(res => {
+        setProducts(res.data);
+      })
+      .catch(err => {
+        console.error(err);
+        // Optional: fallback dummy data for testing
+        const dummyData = Array.from({ length: 20 }, (_, i) => ({
+          _id: i.toString(),
+          title: `Product ${i + 1}`,
+          category: i % 2 === 0 ? 'dresses' : 'shoes',
+          image: 'https://via.placeholder.com/150',
+          price: (19.99 + i).toFixed(2),
+        }));
+        setProducts(dummyData);
+      });
   }, []);
 
   const filteredProducts = products.filter(product => {
@@ -50,14 +64,17 @@ const Home = ({ searchTerm }) => {
         <CategoryCards />
       </motion.div>
 
-      {/* Category Tabs with Hover Animations */}
+      {/* Category Tabs */}
       <motion.div className="flex justify-center gap-3 mt-10 mb-4">
         {['All', 'Dresses', 'Shoes', 'Others'].map((category) => (
           <motion.button
             key={category}
             whileHover={{ scale: 1.1 }}
             whileTap={{ scale: 0.95 }}
-            onClick={() => setSelectedCategory(category)}
+            onClick={() => {
+              setSelectedCategory(category);
+              setVisibleCount(8); // Reset when changing category
+            }}
             className={`px-4 py-2 text-sm rounded-full border transition font-semibold ${
               selectedCategory === category
                 ? 'bg-green-700 text-white'
@@ -72,7 +89,7 @@ const Home = ({ searchTerm }) => {
         ))}
       </motion.div>
 
-      {/* Featured Products with Fade-in Animation */}
+      {/* Featured Products */}
       <motion.section
         className="p-4"
         initial={{ opacity: 0 }}
@@ -100,7 +117,7 @@ const Home = ({ searchTerm }) => {
             }
           }}
         >
-          {filteredProducts.slice(0, 8).map(product => (
+          {filteredProducts.slice(0, visibleCount).map(product => (
             <motion.div
               key={product._id}
               whileHover={{ scale: 1.05 }}
@@ -111,17 +128,21 @@ const Home = ({ searchTerm }) => {
           ))}
         </motion.div>
 
-        <div className="text-center mt-4">
-          <motion.button
-            whileHover={{ scale: 1.05 }}
-            className="bg-green-700 text-white px-4 py-2 rounded hover:bg-green-600 transition"
-          >
-            See More
-          </motion.button>
-        </div>
+        {/* See More Button */}
+        {visibleCount < filteredProducts.length && (
+          <div className="text-center mt-4">
+            <motion.button
+              whileHover={{ scale: 1.05 }}
+              className="bg-green-700 text-white px-4 py-2 rounded hover:bg-green-600 transition"
+              onClick={() => setVisibleCount(prev => prev + 10)}
+            >
+              See More
+            </motion.button>
+          </div>
+        )}
       </motion.section>
 
-      {/* Animated Why Choose Us */}
+      {/* Why Choose Us */}
       <motion.div
         initial={{ opacity: 0, y: 20 }}
         whileInView={{ opacity: 1, y: 0 }}
@@ -130,7 +151,7 @@ const Home = ({ searchTerm }) => {
         <WhyChooseUs />
       </motion.div>
 
-      {/* Animated Stats Bar */}
+      {/* Stats Bar */}
       <motion.div
         initial={{ opacity: 0, scale: 0.95 }}
         whileInView={{ opacity: 1, scale: 1 }}
@@ -139,7 +160,7 @@ const Home = ({ searchTerm }) => {
         <StatsBar />
       </motion.div>
 
-      {/* Testimonials with Fade-in */}
+      {/* Testimonials */}
       <motion.div
         initial={{ opacity: 0 }}
         whileInView={{ opacity: 1 }}
@@ -148,7 +169,7 @@ const Home = ({ searchTerm }) => {
         <Testimonials />
       </motion.div>
 
-      {/* Newsletter with Slide-up Animation */}
+      {/* Newsletter */}
       <motion.div
         initial={{ opacity: 0, y: 30 }}
         whileInView={{ opacity: 1, y: 0 }}

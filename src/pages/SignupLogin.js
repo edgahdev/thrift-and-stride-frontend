@@ -1,93 +1,125 @@
-import React, { useState } from 'react';
-import axios from 'axios';
-import { useNavigate } from 'react-router-dom';
+import React, { useState } from "react";
+import { useNavigate } from "react-router-dom";
+import { toast, ToastContainer } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
 
 const SignupLogin = () => {
-  const [isSignup, setIsSignup] = useState(true);
-  const [form, setForm] = useState({ name: '', email: '', password: '' });
-  const [message, setMessage] = useState('');
+  const [isLogin, setIsLogin] = useState(false);
+  const [name, setName] = useState("");
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
   const navigate = useNavigate();
 
-  const toggleForm = () => {
-    setIsSignup(!isSignup);
-    setForm({ name: '', email: '', password: '' });
-    setMessage('');
-  };
-
-  const handleChange = (e) => {
-    setForm({ ...form, [e.target.name]: e.target.value });
-  };
-
-  const handleSubmit = async (e) => {
+  // ---------- SIGNUP ----------
+  const handleSignup = async (e) => {
     e.preventDefault();
-    const endpoint = isSignup ? 'signup' : 'login';
-
     try {
-      const res = await axios.post(`http://localhost:5000/api/users/${endpoint}`, form);
-      setMessage(`✅ ${isSignup ? 'Account created' : 'Login successful'}`);
-      localStorage.setItem('token', res.data.token);
-      localStorage.setItem('isAdmin', res.data.isAdmin);
-      navigate('/products');
+      const res = await fetch("http://localhost:5000/api/auth/signup", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ name, email, password }),
+      });
+
+      const data = await res.json();
+
+      if (res.ok && data.ok) {
+        toast.success(data.message, { autoClose: 2000 });
+        setName(""); setEmail(""); setPassword("");
+        setIsLogin(true);
+      } else {
+        toast.error(data.message || "Signup failed", { autoClose: 3000 });
+      }
     } catch (err) {
-      setMessage(err.response?.data?.message || '❌ Something went wrong');
+      console.error(err);
+      toast.error("Server error during signup", { autoClose: 3000 });
+    }
+  };
+
+  // ---------- LOGIN ----------
+  const handleLogin = async (e) => {
+    e.preventDefault();
+    try {
+      const res = await fetch("http://localhost:5000/api/auth/login", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email, password }),
+      });
+
+      const data = await res.json();
+
+      if (res.ok && data.ok) {
+        localStorage.setItem("token", data.token);
+        toast.success(data.message, { autoClose: 2000 });
+        setEmail(""); setPassword("");
+        navigate("/account");
+      } else {
+        toast.error(data.message || "Invalid credentials", { autoClose: 3000 });
+      }
+    } catch (err) {
+      console.error(err);
+      toast.error("Server error during login", { autoClose: 3000 });
     }
   };
 
   return (
-    <div className="p-6 max-w-md mx-auto">
-      <h2 className="text-2xl font-bold mb-4 text-center">
-        {isSignup ? 'Create Account' : 'Login to Your Account'}
-      </h2>
+    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-green-100 via-white to-green-50 p-4">
+      <ToastContainer />
+      <div className="bg-white shadow-2xl rounded-2xl p-8 w-full max-w-md transform transition duration-300 hover:scale-[1.02] hover:shadow-green-200">
+        <h2 className="text-3xl font-extrabold mb-6 text-center text-green-700">
+          {isLogin ? "Welcome Back" : "Create an Account"}
+        </h2>
 
-      {message && <div className="mb-4 text-red-600 text-center">{message}</div>}
-
-      <form onSubmit={handleSubmit} className="grid gap-4">
-        {isSignup && (
-          <input
-            type="text"
-            name="name"
-            placeholder="Full Name"
-            value={form.name}
-            onChange={handleChange}
-            required
-            className="border p-2 rounded"
-          />
-        )}
-
-        <input
-          type="email"
-          name="email"
-          placeholder="Email"
-          value={form.email}
-          onChange={handleChange}
-          required
-          className="border p-2 rounded"
-        />
-
-        <input
-          type="password"
-          name="password"
-          placeholder="Password"
-          value={form.password}
-          onChange={handleChange}
-          required
-          className="border p-2 rounded"
-        />
-
-        <button
-          type="submit"
-          className="bg-green-600 text-white p-2 rounded hover:bg-green-700"
+        <form
+          onSubmit={isLogin ? handleLogin : handleSignup}
+          className="flex flex-col gap-4"
         >
-          {isSignup ? 'Sign Up' : 'Login'}
-        </button>
-      </form>
+          {!isLogin && (
+            <input
+              type="text"
+              placeholder="Full Name"
+              value={name}
+              onChange={(e) => setName(e.target.value)}
+              required
+              className="border border-gray-300 rounded-lg p-3 focus:outline-none focus:ring-2 focus:ring-green-400 shadow-sm transition"
+            />
+          )}
 
-      <p className="mt-4 text-center text-sm">
-        {isSignup ? 'Already have an account?' : "Don't have an account?"}{' '}
-        <button onClick={toggleForm} className="text-blue-600 underline">
-          {isSignup ? 'Login' : 'Register'}
-        </button>
-      </p>
+          <input
+            type="email"
+            placeholder="Email Address"
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
+            required
+            className="border border-gray-300 rounded-lg p-3 focus:outline-none focus:ring-2 focus:ring-green-400 shadow-sm transition"
+          />
+
+          <input
+            type="password"
+            placeholder="Password"
+            value={password}
+            onChange={(e) => setPassword(e.target.value)}
+            required
+            className="border border-gray-300 rounded-lg p-3 focus:outline-none focus:ring-2 focus:ring-green-400 shadow-sm transition"
+          />
+
+          <button
+            type="submit"
+            className="bg-gradient-to-r from-green-500 to-green-600 hover:from-green-600 hover:to-green-700 text-white py-3 rounded-lg font-semibold shadow-lg hover:shadow-green-300 transition-transform transform hover:scale-[1.02]"
+          >
+            {isLogin ? "Login" : "Sign Up"}
+          </button>
+        </form>
+
+        <p className="mt-6 text-center text-gray-600">
+          {isLogin ? "Don't have an account?" : "Already have an account?"}{" "}
+          <button
+            onClick={() => setIsLogin(!isLogin)}
+            className="text-green-600 hover:underline font-medium"
+          >
+            {isLogin ? "Sign Up" : "Login"}
+          </button>
+        </p>
+      </div>
     </div>
   );
 };

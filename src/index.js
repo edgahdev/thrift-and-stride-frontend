@@ -3,16 +3,19 @@ import ReactDOM from 'react-dom/client';
 import { BrowserRouter } from 'react-router-dom';
 import App from './App';
 import { CartProvider } from './context/CartContext';
-import { ThemeProvider } from './context/ThemeContext'; // ✅ Import ThemeProvider
+import { ThemeProvider } from './context/ThemeContext';
+import { AuthProvider } from './context/AuthContext'; // ✅ Import AuthProvider
 import './index.css';
 
 const root = ReactDOM.createRoot(document.getElementById('root'));
 root.render(
   <BrowserRouter>
-    <ThemeProvider> {/* ✅ Wrap with ThemeProvider */}
-      <CartProvider>
-        <App />
-      </CartProvider>
+    <ThemeProvider>
+      <AuthProvider> {/* ✅ Wrap with AuthProvider */}
+        <CartProvider>
+          <App />
+        </CartProvider>
+      </AuthProvider>
     </ThemeProvider>
   </BrowserRouter>
 );

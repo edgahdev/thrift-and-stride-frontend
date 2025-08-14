@@ -1,4 +1,5 @@
 import React from 'react';
+import { useNavigate } from 'react-router-dom';
 
 const categories = [
   {
@@ -20,6 +21,14 @@ const categories = [
 ];
 
 const CategoryCards = () => {
+  const navigate = useNavigate();
+
+  const handleExplore = (categoryLabel) => {
+    // Navigate to products page with category as query param
+    // For showing all products regardless, just navigate('/products')
+    navigate(`/products?category=${encodeURIComponent(categoryLabel)}`);
+  };
+
   return (
     <div className="my-10 px-4">
       <h2 className="text-2xl md:text-3xl font-bold text-center text-green-700 mb-6">Shop by Category</h2>
@@ -32,7 +41,14 @@ const CategoryCards = () => {
             <img src={cat.image} alt={cat.label} className="h-40 w-full object-cover" />
             <div className="p-3 text-center">
               <h3 className="font-semibold text-lg">{cat.label}</h3>
-              <button className="mt-2 text-green-600 text-sm hover:underline">Explore Now</button>
+              <button
+                onClick={() => handleExplore(cat.label)}
+                className="mt-2 text-green-600 text-sm hover:underline"
+                type="button"
+                aria-label={`Explore ${cat.label} category`}
+              >
+                Explore Now
+              </button>
             </div>
           </div>
         ))}

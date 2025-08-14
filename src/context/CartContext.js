@@ -1,12 +1,24 @@
-// src/context/CartContext.jsx
-import React, { createContext, useContext, useState } from 'react';
+import React, { createContext, useContext, useState, useEffect } from 'react';
 
 const CartContext = createContext();
 
 export const CartProvider = ({ children }) => {
-  const [cart, setCart] = useState([]);
+  // Initialize cart from localStorage or empty array
+  const [cart, setCart] = useState(() => {
+    try {
+      const savedCart = localStorage.getItem('cart');
+      return savedCart ? JSON.parse(savedCart) : [];
+    } catch (error) {
+      console.error('Failed to parse cart from localStorage:', error);
+      return [];
+    }
+  });
 
-  // ✅ Add product with quantity and size
+  // Save cart to localStorage whenever it changes
+  useEffect(() => {
+    localStorage.setItem('cart', JSON.stringify(cart));
+  }, [cart]);
+
   const addToCart = (product) => {
     const { _id, size } = product;
 
@@ -28,14 +40,12 @@ export const CartProvider = ({ children }) => {
     });
   };
 
-  // ✅ Remove item by id + size
   const removeFromCart = (_id, size) => {
     setCart((prev) =>
       prev.filter((item) => !(item._id === _id && item.size === size))
     );
   };
 
-  // ✅ Optional: Clear entire cart
   const clearCart = () => {
     setCart([]);
   };
