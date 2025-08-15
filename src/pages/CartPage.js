@@ -35,7 +35,6 @@ const CartPage = () => {
   const subtotal = cart.reduce((acc, item) => acc + Number(item.price), 0);
   const total = subtotal + shippingCost;
 
-  // ✅ Updated handlePayment
   const handlePayment = async () => {
     if (!paymentMethod) {
       alert("Please select a payment method");
@@ -50,7 +49,7 @@ const CartPage = () => {
 
     if (paymentMethod === "pesapal") {
       try {
-        const res = await fetch("http://localhost:5000/api/payment/pay", {
+        const res = await fetch("https://thrift-and-stride-backend.onrender.com/api/payment/pay", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({
@@ -60,14 +59,17 @@ const CartPage = () => {
             orderId: Date.now().toString(),
           }),
         });
+
         const data = await res.json();
+
         if (data.redirectUrl) {
           // Save order before redirect
-          const orderRes = await fetch("http://localhost:5000/api/orders", {
+          const orderRes = await fetch("https://thrift-and-stride-backend.onrender.com/api/orders", {
             method: "POST",
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify(orderData),
           });
+
           const savedOrder = await orderRes.json();
           localStorage.setItem("trackingOrderId", savedOrder._id);
 

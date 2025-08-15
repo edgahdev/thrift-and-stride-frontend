@@ -15,14 +15,14 @@ const Home = ({ searchTerm = '' }) => {
   const [visibleCount, setVisibleCount] = useState(8);
 
   useEffect(() => {
-    axios
-      .get('http://localhost:5000/api/products')
-      .then(res => {
+    const fetchProducts = async () => {
+      try {
+        // ✅ Updated to deployed backend
+        const res = await axios.get('https://thrift-and-stride-backend.onrender.com/api/products');
         setProducts(res.data);
-      })
-      .catch(err => {
-        console.error(err);
-        // Optional: fallback dummy data for testing
+      } catch (err) {
+        console.error('Error fetching products:', err);
+        // Fallback dummy data (optional)
         const dummyData = Array.from({ length: 20 }, (_, i) => ({
           _id: i.toString(),
           title: `Product ${i + 1}`,
@@ -31,7 +31,10 @@ const Home = ({ searchTerm = '' }) => {
           price: (19.99 + i).toFixed(2),
         }));
         setProducts(dummyData);
-      });
+      }
+    };
+
+    fetchProducts();
   }, []);
 
   const filteredProducts = products.filter(product => {
@@ -66,14 +69,14 @@ const Home = ({ searchTerm = '' }) => {
 
       {/* Category Tabs */}
       <motion.div className="flex justify-center gap-3 mt-10 mb-4">
-        {['All', 'Dresses', 'Shoes', 'Others'].map((category) => (
+        {['All', 'Dresses', 'Shoes', 'Others'].map(category => (
           <motion.button
             key={category}
             whileHover={{ scale: 1.1 }}
             whileTap={{ scale: 0.95 }}
             onClick={() => {
               setSelectedCategory(category);
-              setVisibleCount(8); // Reset when changing category
+              setVisibleCount(8); // Reset pagination
             }}
             className={`px-4 py-2 text-sm rounded-full border transition font-semibold ${
               selectedCategory === category
@@ -110,11 +113,7 @@ const Home = ({ searchTerm = '' }) => {
           initial="hidden"
           whileInView="visible"
           variants={{
-            visible: {
-              transition: {
-                staggerChildren: 0.1
-              }
-            }
+            visible: { transition: { staggerChildren: 0.1 } },
           }}
         >
           {filteredProducts.slice(0, visibleCount).map(product => (

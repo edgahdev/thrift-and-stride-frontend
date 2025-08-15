@@ -16,6 +16,8 @@ const AdminPage = () => {
   const [error, setError] = useState('');
   const [editingId, setEditingId] = useState(null); // Track which product is being edited
 
+  const BACKEND_URL = 'https://thrift-and-stride-backend.onrender.com';
+
   // Handle form inputs
   const handleChange = (e) => {
     setProduct((prev) => ({ ...prev, [e.target.name]: e.target.value }));
@@ -24,7 +26,7 @@ const AdminPage = () => {
   // Fetch products
   const fetchProducts = async () => {
     try {
-      const res = await axios.get('http://localhost:5000/api/products');
+      const res = await axios.get(`${BACKEND_URL}/api/products`);
       setProducts(res.data);
     } catch (err) {
       console.error('❌ Fetching failed:', err);
@@ -43,7 +45,7 @@ const AdminPage = () => {
     }
 
     try {
-      await axios.post('http://localhost:5000/api/products/add', product, {
+      await axios.post(`${BACKEND_URL}/api/products/add`, product, {
         headers: { Authorization: `Bearer ${token}` },
       });
       setMessage('✅ Product added successfully!');
@@ -70,7 +72,7 @@ const AdminPage = () => {
     if (!window.confirm('Are you sure you want to delete this product?')) return;
 
     try {
-      await axios.delete(`http://localhost:5000/api/products/${id}`, {
+      await axios.delete(`${BACKEND_URL}/api/products/${id}`, {
         headers: { Authorization: `Bearer ${token}` },
       });
       setProducts((prev) => prev.filter((p) => p._id !== id));
@@ -107,7 +109,7 @@ const AdminPage = () => {
     }
 
     try {
-      await axios.put(`http://localhost:5000/api/products/${editingId}`, product, {
+      await axios.put(`${BACKEND_URL}/api/products/${editingId}`, product, {
         headers: { Authorization: `Bearer ${token}` },
       });
       setMessage('✏️ Product updated successfully!');

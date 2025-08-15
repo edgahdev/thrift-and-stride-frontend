@@ -13,11 +13,14 @@ const Products = () => {
   const [currentPage, setCurrentPage] = useState(1);
   const productsPerPage = 8;
 
+  // Use environment variable for backend URL
+  const API_URL = process.env.REACT_APP_API_URL;
+
   useEffect(() => {
     const fetchProducts = async () => {
       setLoading(true);
       try {
-        const res = await axios.get('http://localhost:5000/api/products');
+        const res = await axios.get(`${API_URL}/api/products`);
         setProducts(res.data);
       } catch (err) {
         console.error('Error fetching products:', err);
@@ -27,7 +30,7 @@ const Products = () => {
     };
 
     fetchProducts();
-  }, []);
+  }, [API_URL]); // Include API_URL in dependencies
 
   const filteredProducts = category === 'all'
     ? products

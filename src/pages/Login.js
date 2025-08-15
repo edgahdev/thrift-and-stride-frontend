@@ -11,10 +11,14 @@ const Login = () => {
     e.preventDefault();
 
     try {
-      const res = await axios.post('http://localhost:5000/api/auth/login', {
-        email,
-        password,
-      });
+      // ✅ Change the URL to your deployed backend
+      const res = await axios.post(
+        'https://thrift-and-stride-backend.onrender.com/api/auth/login',
+        {
+          email,
+          password,
+        }
+      );
 
       localStorage.setItem('token', res.data.token);
       localStorage.setItem('isAdmin', res.data.isAdmin);
